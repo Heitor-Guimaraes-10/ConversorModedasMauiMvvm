@@ -1,154 +1,74 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Tela principal do app de conversor de moedas -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ConversorModedasMauiMvvm.MainPage">
 
-namespace ConversorModedasMauiMvvm
-{
-    // ViewModel: é a “parte lógica” que conversa com a tela (XAML).
-    // Ele guarda os dados (ex: moedas, valor digitado, resultado) e os comandos dos botões.
-    public class MainViewModel : INotifyPropertyChanged
-    {
-        // Evento para avisar a tela quando alguma informação mudou
-        public event PropertyChangedEventHandler PropertyChanged;
+    <!-- Permite rolar a tela caso o conteudo seja grande -->
+    <ScrollView>
 
-        // Lista de moedas disponíveis (vai aparecer no Picker da tela)
-        public ObservableCollection<string> Currencies { get; } =
-            new ObservableCollection<string> { "BRL", "USD", "EUR" };
+        <!-- Organiza os elementos verticalmente -->
+        <!-- Padding: distancia interna da borda -->
+        <!-- Spacing: distancia entre os elementos -->
+        <VerticalStackLayout Padding="20" Spacing="14">
 
-        // Valor digitado pelo usuário (caixa de texto Entry).
-        // É string porque a pessoa digita texto, mas depois a gente converte pra número.
-        private string amountText;
-        public string AmountText
-        {
-            get => amountText;
-            set
-            {
-                amountText = value;
-                OnPropertyChanged();
-            }
-        }
+            <!-- Titulo da tela -->
+            <Label Text="Conversor de Moedas"
+                   FontSize="24"
+                   FontAttributes="Bold" />
 
-        // Moeda de origem (o "De" do Picker)
-        private string from;
-        public string From
-        {
-            get => from;
-            set
-            {
-                from = value;
-                OnPropertyChanged();
-            }
-        }
+            <!-- Entrada do valor a converter -->
+            <!-- Placeholder: texto que aparece quando vazio -->
+            <!-- Keyboard Numeric: abre teclado numerico no celular -->
+            <!-- Text Binding: liga ao ViewModel -->
+            <Entry Placeholder="Valor"
+                   Keyboard="Numeric"
+                   Text="{Binding AmountText, Mode=TwoWay}"/>
 
-        // Moeda de destino (o "Para" do Picker)
-        private string to;
-        public string To
-        {
-            get => to;
-            set
-            {
-                to = value;
-                OnPropertyChanged();
-            }
-        }
+            <!-- Grid com 3 colunas: moeda de origem, botao inverter, moeda de destino -->
+            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
 
-        // Resultado da conversão (texto que aparece no final)
-        private string resultText;
-        public string ResultText
-        {
-            get => resultText;
-            set
-            {
-                resultText = value;
-                OnPropertyChanged();
-            }
-        }
+                <!-- Picker para escolher moeda de origem -->
+                <Picker Grid.Column="0"
+                        Title="De"
+                        ItemsSource="{Binding Currencies}"
+                        SelectedItem="{Binding From, Mode=TwoWay}"/>
 
-        // Comando do botão "Converter"
-        public ICommand ConvertCommand { get; }
-        // Comando do botão "Limpar"
-        public ICommand ClearCommand { get; }
-        // Comando do botão "Inverter"
-        public ICommand SwapCommand { get; }
+                <!-- Botao para inverter moedas -->
+                <Button Grid.Column="1"
+                        Text="Inverter"
+                        Command="{Binding SwapCommand}"/>
 
-        // Dicionário com as taxas de câmbio fixas (exemplo simples)
-        private readonly Dictionary<(string From, string To), decimal> _rates =
-            new Dictionary<(string, string), decimal>
-            {
-                { ("USD", "BRL"), 5.60m },
-                { ("BRL", "USD"), 0.18m },
-                { ("EUR", "BRL"), 6.00m },
-                { ("BRL", "EUR"), 0.16m },
-                { ("USD", "EUR"), 0.90m },
-                { ("EUR", "USD"), 1.11m }
-            };
+                <!-- Picker para escolher moeda de destino -->
+                <Picker Grid.Column="2"
+                        Title="Para"
+                        ItemsSource="{Binding Currencies}"
+                        SelectedItem="{Binding To, Mode=TwoWay}"/>
 
-        // Construtor: aqui configuramos os comandos dos botões
-        public MainViewModel()
-        {
-            // Quando clicar em "Converter", chama a função Convert()
-            ConvertCommand = new Command(Convert);
+            </Grid>
 
-            // Quando clicar em "Limpar", chama a função Clear()
-            ClearCommand = new Command(Clear);
+            <!-- Botao para converter -->
+            <Button Text="Converter"
+                    Command="{Binding ConvertCommand}"/>
 
-            // Quando clicar em "Inverter", chama a função Swap()
-            SwapCommand = new Command(Swap);
-        }
+            <!-- Botao para limpar campos e resultado -->
+            <Button Text="Limpar"
+                    Command="{Binding ClearCommand}"/>
 
-        // Função que faz a conversão
-        private void Convert()
-        {
-            // Tenta transformar o texto digitado em número
-            if (decimal.TryParse(AmountText, out decimal amount) && 
-                !string.IsNullOrEmpty(From) && 
-                !string.IsNullOrEmpty(To))
-            {
-                // Procura a taxa de câmbio entre as moedas escolhidas
-                if (_rates.TryGetValue((From, To), out decimal rate))
-                {
-                    // Faz a conta
-                    decimal result = amount * rate;
-                    // Mostra o resultado formatado
-                    ResultText = $"{amount} {From} = {result:F2} {To}";
-                }
-                else
-                {
-                    // Caso não exista a taxa configurada
-                    ResultText = "Conversão não disponível.";
-                }
-            }
-            else
-            {
-                // Se digitou errado ou deixou algo vazio
-                ResultText = "Valor ou moedas inválidas.";
-            }
-        }
+            <!-- Caixa para mostrar resultado -->
+            <!-- Padding: distancia interna -->
+            <!-- HasShadow: se tem sombra (False = sem sombra) -->
+            <Frame Padding="16" HasShadow="False">
 
-        // Função que limpa os campos
-        private void Clear()
-        {
-            AmountText = string.Empty;
-            ResultText = string.Empty;
-            From = null;
-            To = null;
-        }
+                <!-- Resultado da conversao -->
+                <!-- HorizontalOptions Center: centraliza horizontalmente -->
+                <Label Text="{Binding ResultText}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+            </Frame>
 
-        // Função que inverte as moedas
-        private void Swap()
-        {
-            // Troca "De" com "Para"
-            var temp = From;
-            From = To;
-            To = temp;
-        }
+        </VerticalStackLayout>
+    </ScrollView>
 
-        // Essa função avisa a tela que algo mudou,
-        // para atualizar os textos automaticamente
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-    }
-}
+</ContentPage>
