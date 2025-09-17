@@ -1,32 +1,64 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Esta é a tela principal do app de conversor de moedas -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ConversorModedasMauiMvvm.MainPage">
- 
+
+    <!-- A tela pode rolar para cima/baixo caso fique grande -->
     <ScrollView>
-<VerticalStackLayout Padding="20" Spacing="14">
-<Label Text="Conversor de Moedas" FontSize="24" FontAttributes="Bold" />
- 
-            <Entry Placeholder="Valor" Keyboard="Numeric" Text="{Binding AmountText, Mode=TwoWay}"/>
- 
+
+        <!-- Aqui dentro os elementos vão ficar um embaixo do outro -->
+        <VerticalStackLayout Padding="20" Spacing="14">
+
+            <!-- Texto grande no topo: título da tela -->
+            <Label Text="Conversor de Moedas"
+                   FontSize="24"
+                   FontAttributes="Bold" />
+
+            <!-- Caixa para digitar o valor que será convertido -->
+            <Entry Placeholder="Valor"
+                   Keyboard="Numeric"
+                   Text="{Binding AmountText, Mode=TwoWay}"/>
+
+            <!-- Área com 3 colunas: escolher moeda de origem, botão inverter, moeda de destino -->
             <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
-<Picker Grid.Column="0"
+
+                <!-- Escolher a moeda de origem (ex: Real, Dólar) -->
+                <Picker Grid.Column="0"
                         Title="De"
                         ItemsSource="{Binding Currencies}"
                         SelectedItem="{Binding From, Mode=TwoWay}"/>
-<Button Grid.Column="1" Text="Inverter" Command="{Binding SwapCommand}"/>
- 
+
+                <!-- Botão que troca as moedas de lugar (origem vira destino e vice-versa) -->
+                <Button Grid.Column="1"
+                        Text="Inverter"
+                        Command="{Binding SwapCommand}"/>
+
+                <!-- Escolher a moeda de destino (para onde vai converter) -->
                 <Picker Grid.Column="2"
                         Title="Para"
                         ItemsSource="{Binding Currencies}"
                         SelectedItem="{Binding To, Mode=TwoWay}"/>
-</Grid>
-<Button Text="Converter" Command="{Binding ConvertCommand}"/>
-<Button Text="Limpar" Command="{Binding ClearCommand}"/>
-<Frame Padding="16" HasShadow="False">
-<Label Text="{Binding ResultText}" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"/>
-</Frame>
-</VerticalStackLayout>
-</ScrollView>
- 
+
+            </Grid>
+
+            <!-- Botão que faz a conversão quando clicado -->
+            <Button Text="Converter"
+                    Command="{Binding ConvertCommand}"/>
+
+            <!-- Botão que limpa os campos e o resultado -->
+            <Button Text="Limpar"
+                    Command="{Binding ClearCommand}"/>
+
+            <!-- Caixa para mostrar o resultado da conversão -->
+            <Frame Padding="16" HasShadow="False">
+                <Label Text="{Binding ResultText}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"/>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
 </ContentPage>
